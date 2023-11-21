@@ -5,7 +5,6 @@ import {
 import ora from 'ora';
 import chalk from 'chalk';
 import * as fs from 'fs';
-import { importModule } from './common';
 import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 
@@ -13,20 +12,17 @@ const PWD = process.env.PWD;
 export async function generalMigrateSql(
   migrateName: string,
   typeormConfigPath: string,
-  sqlfiledir: string,
+  migrationDir: string,
 ) {
   const spinner = ora({
     text: chalk.bgGreen.black('typeorn migrate is generating...\n'),
     color: 'green',
   }).start();
-  const typeormConfig = await importModule(
-    path.resolve(PWD, typeormConfigPath),
-  );
-  const dir = path.resolve(PWD, typeormConfig.cli.migrationsDir);
+  const dir = path.resolve(PWD, migrationDir);
   const r = await typeormMigrationGenerator(
     migrateName,
     typeormConfigPath,
-    typeormConfig.cli.migrationsDir,
+    migrationDir,
   );
 
   const parseRawUpSql = typeormMigrationParser(
@@ -38,7 +34,7 @@ export async function generalMigrateSql(
     'down',
   );
 
-  const sqlfileFullPath = path.resolve(PWD, `${sqlfiledir}/${r.migrateName}`);
+  const sqlfileFullPath = path.resolve(PWD, `${migrationDir}/${r.migrateName}`);
   mkdirp.sync(sqlfileFullPath);
 
   fs.writeFileSync(path.resolve(`${sqlfileFullPath}/up.sql`), parseRawUpSql);

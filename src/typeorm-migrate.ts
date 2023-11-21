@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 
-import { Project, StringLiteral } from 'ts-morph';
+import { Project, StringLiteral, NoSubstitutionTemplateLiteral } from 'ts-morph';
 
 export interface MigrationEnv {
   [key: string]: any;
@@ -21,7 +21,7 @@ export function typeormMigrationGenerator(
 ): Promise<TypeOrmMigrationResult> {
   return new Promise((resolve) => {
     exec(
-      `npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -n ${migrateName} --config ${configPath} -d ${migrationDir}`,
+      `ts-node ./node_modules/typeorm/cli migration:generate -d ${configPath} ${migrationDir}/${migrateName}`,
       {
         cwd: PWD,
       },
@@ -57,11 +57,25 @@ export function typeormMigrationParser(filePath: string, methodName: string) {
     .getBody()
     .forEachDescendantAsArray()
     .forEach((item) => {
-      if (item instanceof StringLiteral) {
-        temp.push(item.getFullText().replace(/\"/gim, '') + ';');
+      if (item instanceof StringLiteral || item instanceof NoSubstitutionTemplateLiteral) {
+        const sqlRaw = unescapeSqlString(item.getFullText().replace(/\"/gim, ''));
+        temp.push(`${sqlRaw};`);
       }
     });
 
   const fullContent = [].concat(sqlHeader, temp, sqlFooter);
   return fullContent.join('\n');
 }
+
+function unescapeSqlString(sqlString: string) {
+  // Replace double backticks with single backticks
+  sqlString = sqlString.replace(/\\`/g, '`');
+
+  // Replace escaped single quotes with single quotes
+  sqlString = sqlString.replace(/\\'/g, "'");
+
+  sqlString = sqlString.substring(1);
+  sqlString = sqlString.substring(0, sqlString.length - 1);
+  return sqlString;
+}
+

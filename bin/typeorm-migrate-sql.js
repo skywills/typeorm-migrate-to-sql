@@ -6,7 +6,7 @@ const args = require('args');
 args
   .option('name', 'the name of the migrate')
   .option('config', 'the typeorm config')
-  .option('dir', 'the dir of the sql to store');
+  .option('dir', 'the migration dir');
 
 const { name, config, dir } = args.parse(process.argv);
 

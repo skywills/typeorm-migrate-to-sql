@@ -1,3 +1,5 @@
+## fork from https://github.com/qbright/typeorm-migrate-to-sql
+
 # typeorm-migrate-to-sql
 
 通过 typeorm 直接生成 sql 语句 , use typeorm to general sql file
@@ -10,13 +12,13 @@
 
 直接通过命令行进行调用
 
-`npx typeorm-sql -n migrateName -c typeormConfigPath -d sql general dir`
+`npx typeorm-sql -n migrateName -c typeormConfigPath -d migration dir`
 
 ### api
 
 直接通过 API 进行调用
 
-`(alias) function generalMigrateSql(migrateName: string, typeormConfigPath: string, sqlfiledir: string): Promise<void>`
+`(alias) function generalMigrateSql(migrateName: string, typeormConfigPath: string, migrationDir: string): Promise<void>`
 
 eg:
 
